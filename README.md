@@ -20,4 +20,4 @@ Results - Java 17.0.15 (Temurin)
 [info] GetAndAddBench.unsafe  thrpt    3  612197987.515 ± 339996223.052  ops/s
 ```
 
-I tried AtomicLongFieldUpdater too but it doesn't work for private fields. The code for this is in the `updater` branch. `sbt test` will show the failure.
+I also tested AtomicLongFieldUpdater too and it has similar perfoemnce to AtomicLong and Unsafe.
