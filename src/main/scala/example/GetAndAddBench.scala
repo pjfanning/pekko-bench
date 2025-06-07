@@ -22,4 +22,8 @@ class GetAndAddBench extends CommonParams {
     blackhole.consume(cell.nextNameAtomic)
   }
 
+  @Benchmark
+  def atomicUpdater(blackhole: Blackhole): Unit = {
+    blackhole.consume(cell.nextNameAtomicUpdater)
+  }
 }

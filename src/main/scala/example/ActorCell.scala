@@ -19,6 +19,10 @@ class ActorCell {
     _nextNameAtomic.getAndIncrement()
   }
 
+  def nextNameAtomicUpdater: Long = {
+    AbstractActorCell.nextNameUpdater.getAndIncrement(this)
+  }
+
   def printNextName(): Unit = {
     println(s"Next Name: ${_nextName}")
   }
