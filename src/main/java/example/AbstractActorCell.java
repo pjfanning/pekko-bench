@@ -20,6 +20,7 @@ final class AbstractActorCell {
                                     ActorCell.class,
                                     fieldName,
                                     long.class);
+
         } catch (Throwable t) {
             throw new ExceptionInInitializerError(t);
         }

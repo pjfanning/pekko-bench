@@ -22,5 +22,11 @@ class ActorCellTest extends AnyWordSpec with Matchers {
       val nextName = cell.nextNameAtomic
       nextName shouldEqual 0L
     }
+
+    "return the next name using atomicUpdater method" in {
+      val cell = new ActorCell()
+      val nextName = cell.nextNameAtomicUpdater
+      nextName shouldEqual 0L
+    }
   }
 }
