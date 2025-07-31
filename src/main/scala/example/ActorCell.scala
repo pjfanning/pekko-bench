@@ -19,7 +19,7 @@ class ActorCell {
   }
 
   def nextNameHandle: Long = {
-    AbstractActorCell.nextNameHandle.getAndAdd(this, 1).asInstanceOf[Long]
+    AbstractActorCell.nextNameHandle.getAndAdd(this, 1L)
   }
 
   def nextNameAtomic: Long = {
