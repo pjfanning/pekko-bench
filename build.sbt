@@ -8,7 +8,9 @@ lazy val root = (project in file("."))
   .settings(
     name := "pekko-bench",
     libraryDependencies ++= Seq(
-      "org.apache.pekko" %% "pekko-actor" % "1.1.3",
+      "org.apache.pekko" %% "pekko-actor" % "1.1.5",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test
-    )
+    ),
+    // needed for StringAccess (uses VarHandle on private field in String class)
+    Test / javaOptions += "--add-opens=java.base/java.lang=ALL-UNNAMED"
   )
