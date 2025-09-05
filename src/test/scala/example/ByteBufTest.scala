@@ -64,13 +64,13 @@ class ByteStringWrapper(byteString: ByteString) {
     else if (byteString.apply(fromIndex + 1) == value) fromIndex + 1
     else if (byteCount == 2) -1
     else if (byteString.apply(fromIndex + 2) == value) fromIndex + 2
-    else if (byteCount == 3) return -1
+    else if (byteCount == 3) -1
     else if (byteString.apply(fromIndex + 3) == value) fromIndex + 3
-    else if (byteCount == 4) return -1
+    else if (byteCount == 4) -1
     else if (byteString.apply(fromIndex + 4) == value) fromIndex + 4
-    else if (byteCount == 5) return -1
+    else if (byteCount == 5) -1
     else if (byteString.apply(fromIndex + 5) == value) fromIndex + 5
-    else if (byteCount == 6) return -1
+    else if (byteCount == 6) -1
     else if (byteString.apply(fromIndex + 6) == value) fromIndex + 6
     else -1
   }
