@@ -21,12 +21,13 @@ class ByteStringWrapper(byteString: ByteString) {
     java.lang.Long.numberOfLeadingZeros(word) >>> 3
   }
 
-  private def compilePattern(byteToFind: Byte): Long = (byteToFind.toLong & 255L) * 72340172838076673L
+  private def compilePattern(byteToFind: Byte): Long =
+    (byteToFind.toLong & 0xFFL) * 0x101010101010101L
 
   private def applyPattern(word: Long, pattern: Long): Long = {
     val input = word ^ pattern
-    val tmp = (input & 9187201950435737471L) + 9187201950435737471L
-    ~(tmp | input | 9187201950435737471L)
+    val tmp = (input & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL
+    ~(tmp | input | 0x7F7F7F7F7F7F7F7FL)
   }
 
   /**
