@@ -34,17 +34,15 @@ class ByteStringWrapper(byteString: ByteString) {
    * usage while searching for {@code value}.
    */
   def firstIndexOf(byteString: ByteString, value: Byte): Int = {
-    val fromIndex = 0
-    val toIndex = byteString.length - 1
-    if (fromIndex >= toIndex || byteString.isEmpty) return -1
-    val length = toIndex - fromIndex
-    var offset = fromIndex
+    if (byteString.isEmpty) return -1
+    val length = byteString.length - 1
+    var offset = 0
     val byteCount = length & 7
     if (byteCount > 0) {
-      val index = unrolledFirstIndexOf(byteString, fromIndex, byteCount, value)
+      val index = unrolledFirstIndexOf(byteString, 0, byteCount, value)
       if (index != -1) return index
       offset += byteCount
-      if (offset == toIndex) return -1
+      if (offset == length) return -1
     }
     val longCount = length >>> 3
     val pattern = compilePattern(value)
