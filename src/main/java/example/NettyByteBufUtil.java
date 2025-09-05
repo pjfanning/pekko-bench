@@ -4,8 +4,6 @@ import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.SWARUtil;
 import org.apache.pekko.util.ByteString;
 
-import java.nio.ByteOrder;
-
 public class NettyByteBufUtil {
   /**
    * This is using a SWAR (SIMD Within A Register) batch read technique to minimize bound-checks and improve memory
@@ -18,7 +16,7 @@ public class NettyByteBufUtil {
       return -1;
     }
     final int length = toIndex - fromIndex;
-    byteString.checkIndex(fromIndex, length);
+    //byteString.checkIndex(fromIndex, length);
     if (!PlatformDependent.isUnaligned()) {
       return byteString.indexOf(value, fromIndex);
     }
@@ -36,16 +34,13 @@ public class NettyByteBufUtil {
       }
     }
     final int longCount = length >>> 3;
-    final ByteOrder nativeOrder = ByteOrder.nativeOrder();
-    final boolean isNative = nativeOrder == byteString.order();
-    final boolean useLE = nativeOrder == ByteOrder.LITTLE_ENDIAN;
     final long pattern = SWARUtil.compilePattern(value);
     for (int i = 0; i < longCount; i++) {
       // use the faster available getLong
-      final long word = useLE ? byteString._getLongLE(offset) : byteString._getLong(offset);
+      final long word = 0; // byteString.getLong(offset);
       final long result = SWARUtil.applyPattern(word, pattern);
       if (result != 0) {
-        return offset + SWARUtil.getIndex(result, isNative);
+        return offset + SWARUtil.getIndex(result, true);
       }
       offset += Long.BYTES;
     }
