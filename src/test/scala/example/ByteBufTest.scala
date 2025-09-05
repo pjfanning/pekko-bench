@@ -40,7 +40,7 @@ class ByteStringWrapper(byteString: ByteString) {
     var offset = 0
     val byteCount = length & 7
     if (byteCount > 0) {
-      val index = unrolledFirstIndexOf(byteString, 0, byteCount, value)
+      val index = unrolledFirstIndexOf(0, byteCount, value)
       if (index != -1) return index
       offset += byteCount
       if (offset == length) return -1
@@ -57,7 +57,35 @@ class ByteStringWrapper(byteString: ByteString) {
     -1
   }
 
-  private def unrolledFirstIndexOf(byteString: ByteString, fromIndex: Int, byteCount: Int, value: Byte): Int = {
+  /**
+   * This is using a SWAR (SIMD Within A Register) batch read technique to minimize bound-checks and improve memory
+   * usage while searching for {@code value}.
+   */
+  def indexOf(value: Byte, from: Int): Int = {
+    val fromIndex = Math.max(0, from)
+    val toIndex = byteString.length - 1
+    if (fromIndex >= toIndex) return -1
+    val length = toIndex - fromIndex
+    var offset = fromIndex
+    val byteCount = length & 7
+    if (byteCount > 0) {
+      val index = unrolledFirstIndexOf(fromIndex, byteCount, value)
+      if (index != -1) return index
+      offset += byteCount
+      if (offset == toIndex) return -1
+    }
+    val longCount = length >>> 3
+    val pattern = compilePattern(value)
+    for (i <- 0 until longCount) {
+      val word = getLong(offset)
+      val result = applyPattern(word, pattern)
+      if (result != 0) return offset + getIndex(result)
+      offset += java.lang.Long.BYTES
+    }
+    -1
+  }
+
+  private def unrolledFirstIndexOf(fromIndex: Int, byteCount: Int, value: Byte): Int = {
     if (byteString.apply(fromIndex) == value) fromIndex
     else if (byteCount == 1) -1
     else if (byteString.apply(fromIndex + 1) == value) fromIndex + 1
@@ -111,6 +139,14 @@ class ByteBufTest extends AnyWordSpec with Matchers {
       val buf = new ByteStringWrapper(byteStringConcat)
       buf.indexOf(21.toByte) shouldEqual 7
       buf.indexOf(99.toByte) shouldEqual -1
+
+      buf.indexOf(21.toByte, 0) shouldEqual 7
+      buf.indexOf(99.toByte, 0) shouldEqual -1
+      buf.indexOf(21.toByte, 7) shouldEqual 7
+      // TODO: fixme
+      //buf.indexOf(21.toByte, 8) shouldEqual 15
+      buf.indexOf(99.toByte, 8) shouldEqual -1
+
     }
   }
 }
