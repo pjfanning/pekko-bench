@@ -34,7 +34,7 @@ class ByteStringWrapper(byteString: ByteString) {
    * This is using a SWAR (SIMD Within A Register) batch read technique to minimize bound-checks and improve memory
    * usage while searching for {@code value}.
    */
-  def firstIndexOf(byteString: ByteString, value: Byte): Int = {
+  def indexOf(value: Byte): Int = {
     if (byteString.isEmpty) return -1
     val length = byteString.length - 1
     var offset = 0
@@ -91,7 +91,9 @@ class ByteBufTest extends AnyWordSpec with Matchers {
       buf.writeBytes(Array[Byte](0, 0, 0, 0, 7, 91, -51, 21))
       buf.indexOf(0, buf.capacity(), 21.toByte) shouldEqual 7
       buf.indexOf(0, buf.capacity(), 99.toByte) shouldEqual -1
-
+      buf.indexOf(7, buf.capacity(), 21.toByte) shouldEqual 7
+      buf.indexOf(8, buf.capacity(), 21.toByte) shouldEqual 15
+      buf.indexOf(8, buf.capacity(), 99.toByte) shouldEqual -1
     }
   }
   "ByteStringWrapper" should {
@@ -107,8 +109,8 @@ class ByteBufTest extends AnyWordSpec with Matchers {
       val byteString1 = ByteString.fromArrayUnsafe(Array[Byte](0, 0, 0, 0, 7, 91, -51, 21))
       val byteStringConcat = byteString1 ++ byteString1
       val buf = new ByteStringWrapper(byteStringConcat)
-      buf.firstIndexOf(byteStringConcat, 21.toByte) shouldEqual 7
-      buf.firstIndexOf(byteStringConcat, 99.toByte) shouldEqual -1
+      buf.indexOf(21.toByte) shouldEqual 7
+      buf.indexOf(99.toByte) shouldEqual -1
     }
   }
 }
