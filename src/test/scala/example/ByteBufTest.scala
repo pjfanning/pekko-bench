@@ -36,16 +36,16 @@ class ByteStringWrapper(byteString: ByteString) {
    */
   def indexOf(value: Byte): Int = {
     if (byteString.isEmpty) return -1
-    val length = byteString.length
+    val searchLength = byteString.length
     var offset = 0
-    val byteCount = length & 7
+    val byteCount = searchLength & 7
     if (byteCount > 0) {
       val index = unrolledFirstIndexOf(0, byteCount, value)
       if (index != -1) return index
       offset += byteCount
-      if (offset == length) return -1
+      if (offset == searchLength) return -1
     }
-    val longCount = length >>> 3
+    val longCount = searchLength >>> 3
     val pattern = compilePattern(value)
     for (i <- 0 until longCount) {
       // use the faster available getLong
@@ -65,16 +65,16 @@ class ByteStringWrapper(byteString: ByteString) {
     val fromIndex = Math.max(0, from)
     val toIndex = byteString.length
     if (fromIndex >= toIndex) return -1
-    val length = toIndex - fromIndex
+    val searchLength = toIndex - fromIndex
     var offset = fromIndex
-    val byteCount = length & 7
+    val byteCount = searchLength & 7
     if (byteCount > 0) {
       val index = unrolledFirstIndexOf(fromIndex, byteCount, value)
       if (index != -1) return index
       offset += byteCount
       if (offset == toIndex) return -1
     }
-    val longCount = length >>> 3
+    val longCount = searchLength >>> 3
     val pattern = compilePattern(value)
     for (i <- 0 until longCount) {
       val word = getLong(offset)
