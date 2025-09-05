@@ -36,7 +36,7 @@ class ByteStringWrapper(byteString: ByteString) {
    */
   def indexOf(value: Byte): Int = {
     if (byteString.isEmpty) return -1
-    val length = byteString.length - 1
+    val length = byteString.length
     var offset = 0
     val byteCount = length & 7
     if (byteCount > 0) {
@@ -63,7 +63,7 @@ class ByteStringWrapper(byteString: ByteString) {
    */
   def indexOf(value: Byte, from: Int): Int = {
     val fromIndex = Math.max(0, from)
-    val toIndex = byteString.length - 1
+    val toIndex = byteString.length
     if (fromIndex >= toIndex) return -1
     val length = toIndex - fromIndex
     var offset = fromIndex
@@ -143,8 +143,7 @@ class ByteBufTest extends AnyWordSpec with Matchers {
       buf.indexOf(21.toByte, 0) shouldEqual 7
       buf.indexOf(99.toByte, 0) shouldEqual -1
       buf.indexOf(21.toByte, 7) shouldEqual 7
-      // TODO: fixme
-      //buf.indexOf(21.toByte, 8) shouldEqual 15
+      buf.indexOf(21.toByte, 8) shouldEqual 15
       buf.indexOf(99.toByte, 8) shouldEqual -1
 
     }
