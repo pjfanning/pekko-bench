@@ -1,11 +1,18 @@
 package example
 
+import java.lang.invoke.MethodHandles
+
 import org.apache.pekko.util.ByteString
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+
+object VarHandlerFactory {
+  val longBeArrayView = MethodHandles.byteArrayViewVarHandle(classOf[Array[Long]], java.nio.ByteOrder.BIG_ENDIAN)
+}
+
 class ByteStringWrapper(byteString: ByteString) {
-  def getLong(index: Int): Long = {
+  def getLong0(index: Int): Long = {
     (byteString.apply(index).toLong & 0xFF) << 56 |
       (byteString.apply(index + 1).toLong & 0xFF) << 48 |
       (byteString.apply(index + 2).toLong & 0xFF) << 40 |
@@ -14,6 +21,10 @@ class ByteStringWrapper(byteString: ByteString) {
       (byteString.apply(index + 5).toLong & 0xFF) << 16 |
       (byteString.apply(index + 6).toLong & 0xFF) << 8 |
       (byteString.apply(index + 7).toLong & 0xFF)
+  }
+
+  def getLong(index: Int): Long = {
+    VarHandlerFactory.longBeArrayView.get(byteString.toArrayUnsafe, index).asInstanceOf[Long]
   }
 
   // big endian only
