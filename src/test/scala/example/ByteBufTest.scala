@@ -114,6 +114,82 @@ class ByteStringWrapper(byteString: ByteString) {
   }
 }
 
+class ByteArrayWrapper(array: Array[Byte], start: Int, length: Int) {
+  def getLong(index: Int): Long = {
+    (array(index).toLong & 0xFF) << 56 |
+      (array(index + 1).toLong & 0xFF) << 48 |
+      (array(index + 2).toLong & 0xFF) << 40 |
+      (array(index + 3).toLong & 0xFF) << 32 |
+      (array(index + 4).toLong & 0xFF) << 24 |
+      (array(index + 5).toLong & 0xFF) << 16 |
+      (array(index + 6).toLong & 0xFF) << 8 |
+      (array(index + 7).toLong & 0xFF)
+  }
+
+  // big endian only
+  private def getIndex(word: Long): Int = {
+    java.lang.Long.numberOfLeadingZeros(word) >>> 3
+  }
+
+  private def compilePattern(byteToFind: Byte): Long =
+    (byteToFind.toLong & 0xFFL) * 0x101010101010101L
+
+  private def applyPattern(word: Long, pattern: Long): Long = {
+    val input = word ^ pattern
+    val tmp = (input & 0x7F7F7F7F7F7F7F7FL) + 0x7F7F7F7F7F7F7F7FL
+    ~(tmp | input | 0x7F7F7F7F7F7F7F7FL)
+  }
+
+  /**
+   * This is using a SWAR (SIMD Within A Register) batch read technique to minimize bound-checks and improve memory
+   * usage while searching for {@code value}.
+   */
+  def indexOf(value: Byte): Int = indexOf(value, 0)
+
+  def indexOf(elem: Byte, from: Int): Int = {
+    val fromIndex = start + math.max(0, from)
+    if (fromIndex >= length) return -1
+    val searchLength = length - fromIndex
+    var offset = fromIndex
+    val byteCount = searchLength & 7
+    if (byteCount > 0) {
+      val index = unrolledFirstIndexOf(fromIndex, byteCount, elem)
+      if (index != -1) return index
+      offset += byteCount
+      if (offset == length) return -1
+    }
+    val longCount = searchLength >>> 3
+    val pattern = compilePattern(elem)
+    var i = 0
+    while (i < longCount) {
+      val word = getLong(start + offset)
+      val result = applyPattern(word, pattern)
+      if (result != 0) return offset + getIndex(result)
+      offset += java.lang.Long.BYTES
+      i += 1
+    }
+    -1
+  }
+
+  // the calling code already adds the startIndex so this method does not need to
+  private def unrolledFirstIndexOf(fromIndex: Int, byteCount: Int, value: Byte): Int = {
+    if (array(fromIndex) == value) fromIndex
+    else if (byteCount == 1) -1
+    else if (array(fromIndex + 1) == value) fromIndex + 1
+    else if (byteCount == 2) -1
+    else if (array(fromIndex + 2) == value) fromIndex + 2
+    else if (byteCount == 3) -1
+    else if (array(fromIndex + 3) == value) fromIndex + 3
+    else if (byteCount == 4) -1
+    else if (array(fromIndex + 4) == value) fromIndex + 4
+    else if (byteCount == 5) -1
+    else if (array(fromIndex + 5) == value) fromIndex + 5
+    else if (byteCount == 6) -1
+    else if (array(fromIndex + 6) == value) fromIndex + 6
+    else -1
+  }
+}
+
 class ByteBufTest extends AnyWordSpec with Matchers {
   "Netty ByteBuf" should {
     "return getLong" in {
@@ -157,6 +233,23 @@ class ByteBufTest extends AnyWordSpec with Matchers {
       buf.indexOf(21.toByte, 8) shouldEqual 15
       buf.indexOf(99.toByte, 8) shouldEqual -1
 
+    }
+  }
+  "ByteArrayWrapper" should {
+    "return getLong" in {
+      val byteString1 = new ByteArrayWrapper(Array[Byte](0, 0, 0, 0, 7, 91, -51, 21), 0, 8)
+      byteString1.getLong(0) shouldEqual 123456789L
+    }
+    "return indexOf" in {
+      val byteString1 = new ByteArrayWrapper(Array[Byte](0, 0, 0, 0, 7, 91, -51, 21), 0, 8)
+      byteString1.indexOf(21.toByte) shouldEqual 7
+      byteString1.indexOf(99.toByte) shouldEqual -1
+    }
+    "return indexOf (non-zero start)" in {
+      val byteString1 = new ByteArrayWrapper(Array[Byte](0, 0, 0, 0, 7, 91, -51, 21), 3, 3)
+      byteString1.indexOf(21.toByte) shouldEqual -1
+      byteString1.indexOf(99.toByte) shouldEqual -1
+      byteString1.indexOf(91.toByte) shouldEqual 2
     }
   }
 }
