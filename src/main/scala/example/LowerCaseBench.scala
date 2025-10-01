@@ -6,6 +6,16 @@ import org.openjdk.jmh.infra.Blackhole
 class LowerCaseBench extends CommonParams {
 
   @Benchmark
+  def versioned(blackhole: Blackhole): Unit = {
+    blackhole.consume(LowerCase.versionedToLower('A'))
+  }
+
+  @Benchmark
+  def versionedNoAction(blackhole: Blackhole): Unit = {
+    blackhole.consume(LowerCase.versionedToLower('a'))
+  }
+
+  @Benchmark
   def pekkoHttp(blackhole: Blackhole): Unit = {
     blackhole.consume(LowerCase.toLowerCase('A'))
   }
