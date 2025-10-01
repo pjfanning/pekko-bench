@@ -5,6 +5,9 @@ import org.openjdk.jmh.infra.Blackhole
 
 class LowerCaseBench extends CommonParams {
 
+  final val Byte_A = 'A'.toByte
+  final val Byte_a = 'a'.toByte
+
   @Benchmark
   def versioned(blackhole: Blackhole): Unit = {
     blackhole.consume(LowerCase.versionedToLower('A'))
@@ -43,5 +46,15 @@ class LowerCaseBench extends CommonParams {
   @Benchmark
   def parboiledNoAction(blackhole: Blackhole): Unit = {
     blackhole.consume(org.parboiled2.CharUtils.toLowerCase('a'))
+  }
+
+  @Benchmark
+  def lowercaseByte(blackhole: Blackhole): Unit = {
+    blackhole.consume(LowerCase.toLowerCaseByte(Byte_A))
+  }
+
+  @Benchmark
+  def lowercaseByteNoAction(blackhole: Blackhole): Unit = {
+    blackhole.consume(LowerCase.toLowerCaseByte(Byte_a))
   }
 }
