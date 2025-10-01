@@ -7,7 +7,7 @@ object LowerCase {
 
   val majorVersion: Int = Runtime.version().feature()
 
-  lazy val versionedToLower = if (majorVersion >= 21)
+  val versionedToLower = if (majorVersion >= 21)
     Character.toLowerCase _
   else
     toLowerCase _
