@@ -26,11 +26,6 @@ class IndexOfSliceBench extends CommonParams {
   }
 
   @Benchmark
-  def indexOfSliceByteString0Compact(blackhole: Blackhole): Unit = {
-    blackhole.consume(ByteStringUtil.indexOfSlice0(byteStringLong, slice0, 0))
-  }
-
-  @Benchmark
   def indexOfSliceBytes1Compact(blackhole: Blackhole): Unit = {
     blackhole.consume(ByteStringUtil.indexOfSlice1(byteStringLong, bytes0, 0))
   }
@@ -43,11 +38,6 @@ class IndexOfSliceBench extends CommonParams {
   @Benchmark
   def indexOfSliceBytes0Concat(blackhole: Blackhole): Unit = {
     blackhole.consume(ByteStringUtil.indexOfSlice0(byteStrings, bytes1, 0))
-  }
-
-  @Benchmark
-  def indexOfSliceByteString0Concat(blackhole: Blackhole): Unit = {
-    blackhole.consume(ByteStringUtil.indexOfSlice0(byteStrings, slice1, 0))
   }
 
   @Benchmark
